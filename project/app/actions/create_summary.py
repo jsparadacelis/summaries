@@ -12,4 +12,3 @@ class CreateSummary:
 
     def _fetch_text_from_url(self, url: str) -> str:
         return "This is a placeholder text fetched from the URL."
-        
