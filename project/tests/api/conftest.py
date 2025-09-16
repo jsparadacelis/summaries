@@ -1,36 +1,29 @@
 import pytest
+from testcontainers.core.waiting_utils import wait_for_logs
 from testcontainers.postgres import PostgresContainer
-from tortoise.contrib.fastapi import register_tortoise
-from fastapi import FastAPI
-from httpx import AsyncClient
 
-from yourapp.main import app as fastapi_app
-
-@pytest.fixture(scope="session")
-def anyio_backend():
-    return "asyncio"
+POSTGRES_IMAGE = "postgres:14"
+POSTGRES_USER = "postgres"
+POSTGRES_PASSWORD = "test_password"
+POSTGRES_DATABASE = "test_database"
+POSTGRES_CONTAINER_PORT = 5432
 
 @pytest.fixture(scope="session")
-def postgres_container():
-    with PostgresContainer("postgres:15") as postgres:
-        yield postgres  # starts/stops container automatically
-
-@pytest.fixture(scope="function")
-async def test_app(postgres_container):
-    db_url = postgres_container.get_connection_url().replace("postgresql://", "postgres://")  # Tortoise expects this
-
-    register_tortoise(
-        fastapi_app,
-        db_url=db_url,
-        modules={"models": ["yourapp.models"]},
-        generate_schemas=True,
-        add_exception_handlers=True,
+def postgres_container() -> PostgresContainer:
+    """
+    Setup postgres container
+    """
+    postgres = PostgresContainer(
+        image=POSTGRES_IMAGE,
+        user=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+        dbname=POSTGRES_DATABASE,
+        port=POSTGRES_CONTAINER_PORT,
     )
-
-    async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
-        yield ac
-
-    # Cleanup: truncate all tables
-    from tortoise import Tortoise
-    for model in Tortoise.apps.get("models").values():
-        await model.all().delete()
+    with postgres:
+        wait_for_logs(
+            postgres,
+            r"UTC \[1\] LOG:  database system is ready to accept connections",
+            10,
+        )
+        yield postgres

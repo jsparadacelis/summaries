@@ -16,7 +16,7 @@ services:
     depends_on:   # new
       - web-db
 
-  web-db:
+  db:
     build:
       context: ./project/db
       dockerfile: Dockerfile
