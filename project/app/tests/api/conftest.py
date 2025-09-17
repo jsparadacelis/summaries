@@ -8,6 +8,7 @@ POSTGRES_PASSWORD = "test_password"
 POSTGRES_DATABASE = "test_database"
 POSTGRES_CONTAINER_PORT = 5432
 
+
 @pytest.fixture(scope="session")
 def postgres_container() -> PostgresContainer:
     """
