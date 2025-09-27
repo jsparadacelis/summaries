@@ -1,4 +1,4 @@
-from app.domain.text_summarizer import TextSummarizer
+from src.domain.text_summarizer import TextSummarizer
 
 
 class CreateSummary:

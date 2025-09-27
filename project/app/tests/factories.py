@@ -1,18 +1,13 @@
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from datetime import datetime
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from models.summary import TextSummary
-from models.db import SessionLocal
+from project.app.models.summary import TextSummary
 
 
 class TextSummaryFactory(SQLAlchemyModelFactory):
     class Meta:
         model = TextSummary
-        sqlalchemy_session = SessionLocal()
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: n)

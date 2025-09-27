@@ -1,8 +1,8 @@
 from typing import Generator
 from unittest.mock import Mock, create_autospec
 import pytest
-from app.actions.create_summary import CreateSummary
-from app.domain.text_summarizer import TextSummarizer
+from src.actions.create_summary import CreateSummary
+from src.domain.text_summarizer import TextSummarizer
 
 
 class TestCreateSummary:
