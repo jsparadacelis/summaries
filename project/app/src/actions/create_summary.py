@@ -15,14 +15,7 @@ class CreateSummary:
 
     def execute(self, url: str) -> str:
         original_text = self._fetch_text_from_url(url)
-
-        text_summarized = self._text_summarizer.summarize(original_text)
-
-        summary = Summary(url=url, summary=text_summarized)
-
-        self._repo.save(summary)
-
-        return summary
+        return original_text
 
     def _fetch_text_from_url(self, url: str) -> str:
         return "This is a placeholder text fetched from the URL."
