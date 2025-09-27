@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 
+
 @dataclass
 class Summary:
     url: str
@@ -10,6 +11,5 @@ class Summary:
 
 
 class TextSummaryRepository(ABC):
-
     @abstractmethod
     def save(self, summary: Summary) -> None: ...

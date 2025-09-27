@@ -1,3 +1,7 @@
+from project.app.src.domain.repositories.text_summary_repository import (
+    Summary,
+    TextSummaryRepository,
+)
 from sqlalchemy.orm import Session
 
 from project.app.models.summary import TextSummary
@@ -5,19 +9,18 @@ from project.app.src.domain.text_summarizer import TextSummarizer
 
 
 class CreateSummary:
-    def __init__(self, text_summarizer: TextSummarizer, db_session: Session):
+    def __init__(self, text_summarizer: TextSummarizer, repo: TextSummaryRepository):
         self._text_summarizer = text_summarizer
-        self._db_session = db_session
+        self._repo = repo
 
     def execute(self, url: str) -> str:
         original_text = self._fetch_text_from_url(url)
 
-        summary = self._text_summarizer.summarize(original_text)
+        text_summarized = self._text_summarizer.summarize(original_text)
 
-        text_summary = TextSummary(url=url, summary=summary)
-        self._db_session.add(text_summary)
-        self._db_session.commit()
-        self._db_session.refresh(text_summary)
+        summary = Summary(url=url, summary=text_summarized)
+
+        self._repo.save(summary)
 
         return summary
 
