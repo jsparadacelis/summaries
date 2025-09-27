@@ -12,49 +12,59 @@ from project.app.models.summary import TextSummary  # Import to register the mod
 from project.app.tests.factories import TextSummaryFactory
 
 
-# Create in-memory test database with shared connection
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+# Test database setup - using StaticPool to share in-memory database across connections
+TEST_DATABASE_URL = "sqlite:///:memory:"
+test_engine = create_engine(
+    TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
+    poolclass=StaticPool,  # Ensures all connections share the same in-memory database
 )
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-@pytest.fixture
-def client() -> Generator[TestClient, None, None]:
-    # Create tables in the test database
-    Base.metadata.create_all(bind=engine)
-
-    # Override the dependency to use test database
-    app.dependency_overrides[get_db] = override_get_db
-
-    with TestClient(app) as c:
-        yield c
-
-    # Clean up
-    app.dependency_overrides.clear()
-    Base.metadata.drop_all(bind=engine)
-
-
-@pytest.fixture
+@pytest.fixture(scope="function")
 def db_session() -> Generator[Session, None, None]:
-    Base.metadata.create_all(bind=engine)
+    """
+    Create a fresh database session for each test.
+    This fixture is for tests that need direct database access.
+    """
+    # Create all tables
+    Base.metadata.create_all(bind=test_engine)
+
+    # Create session
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
     session = TestingSessionLocal()
 
+    # Configure Factory Boy to use this session
     TextSummaryFactory._meta.sqlalchemy_session = session
 
     try:
         yield session
     finally:
         session.close()
-        Base.metadata.drop_all(bind=engine)
+        # Clean up tables
+        Base.metadata.drop_all(bind=test_engine)
+
+
+@pytest.fixture(scope="function")
+def client(db_session: Session) -> Generator[TestClient, None, None]:
+    """
+    Create a test client for API tests.
+    This fixture depends on db_session to ensure database is set up.
+    """
+    def get_test_db():
+        """Override the get_db dependency to use our test database session"""
+        try:
+            yield db_session
+        except:
+            db_session.rollback()
+            raise
+
+    # Override the database dependency
+    app.dependency_overrides[get_db] = get_test_db
+
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        # Clean up dependency override
+        app.dependency_overrides.clear()
