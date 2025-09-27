@@ -7,7 +7,7 @@ from datetime import datetime
 class Summary:
     url: str
     summary: str
-    created_at: datetime
+    created_at: datetime | None = datetime.now()
 
 
 class TextSummaryRepository(ABC):

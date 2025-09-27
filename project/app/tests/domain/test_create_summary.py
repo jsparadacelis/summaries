@@ -34,6 +34,6 @@ class TestCreateSummary:
 
         assert summary == "This is a summary."
 
-        mock_text_summarizer.assert_called()
+        mock_text_summarizer.summarize.assert_called()
 
-        mock_text_summary_repository.assert_called()
+        mock_text_summary_repository.save.assert_called()
