@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
-from project.app.src.domain.text_summarizer import TextSummarizer
+
 from project.app.models.summary import TextSummary
+from project.app.src.domain.text_summarizer import TextSummarizer
 
 
 class CreateSummary:

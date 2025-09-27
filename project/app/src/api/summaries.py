@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from project.app.models.db import get_db
 from project.app.src.actions.create_summary import CreateSummary
 from project.app.src.infrastructure.dummy_summarizer import DummyTextSummarizer
-from project.app.models.db import get_db
 
 
 router = APIRouter(prefix="/summaries", tags=["summaries"])

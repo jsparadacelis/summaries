@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
-from datetime import datetime
 
 from project.app.models.summary import TextSummary
 

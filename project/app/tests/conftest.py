@@ -3,7 +3,7 @@ from typing import Generator
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from project.app.main import app
@@ -31,7 +31,9 @@ def db_session() -> Generator[Session, None, None]:
     Base.metadata.create_all(bind=test_engine)
 
     # Create session
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=test_engine
+    )
     session = TestingSessionLocal()
 
     # Configure Factory Boy to use this session
@@ -51,6 +53,7 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     Create a test client for API tests.
     This fixture depends on db_session to ensure database is set up.
     """
+
     def get_test_db():
         """Override the get_db dependency to use our test database session"""
         try:
